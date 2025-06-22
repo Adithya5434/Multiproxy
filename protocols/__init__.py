@@ -7,19 +7,21 @@ import config
 import socks5
 import socks4
 import minecraft_proxy
+import static_web
+import http_proxy
 
 socks5_proxy = socks5.Proxy(config.SOCKS5_USERNAME, config.SOCKS5_PASSWORD)
 socks4_proxy = socks4.Proxy(config.SOCKS4_USERNAME)
 mc_proxy = minecraft_proxy.Proxy()
+static_web_proxy = static_web.Proxy()
+httpProxy = http_proxy.Proxy()
 
-
-
-def route_connection(connection: socket.socket, addr):
+def route_connection(connection: socket.socket, addr, DEBUG=False):
     try:
         data = connection.recv(1024, socket.MSG_PEEK)
 
         if not data:
-            print(f"[X] No data form {addr}")
+            if DEBUG: print(f"[X] No data form {addr}")
             connection.close()
             return
 
@@ -34,18 +36,22 @@ def route_connection(connection: socket.socket, addr):
             return
 
         elif protocol == "http_proxy":
-            pass
+            threading.Thread(target=httpProxy.handle_client, args=(connection,)).start()
+            return
 
         elif protocol == "http_web":
-            pass
+            threading.Thread(target=static_web_proxy.handle_client, args=(connection,)).start()
+            return
 
         elif protocol == "minecraft":
             threading.Thread(target=mc_proxy.handle_client, args=(connection,)).start()
-
+            return
+        
         else:
-            print(f"[x] Unknown protocol from {addr}, first byte: {data[0]}")
+            if DEBUG:
+                print(f"[x] Unknown protocol from {addr}, first byte: {data[0]}")
             connection.close()
 
     except Exception as e:
-        print(f"[!] Router error form {addr}: ", e)
+        if DEBUG: print(f"[!] Router error form {addr}: ", e)
         connection.close()
