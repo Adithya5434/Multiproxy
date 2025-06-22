@@ -6,9 +6,12 @@ import config
 
 import socks5
 import socks4
+import minecraft_proxy
 
 socks5_proxy = socks5.Proxy(config.SOCKS5_USERNAME, config.SOCKS5_PASSWORD)
 socks4_proxy = socks4.Proxy(config.SOCKS4_USERNAME)
+mc_proxy = minecraft_proxy.Proxy()
+
 
 
 def route_connection(connection: socket.socket, addr):
@@ -37,7 +40,7 @@ def route_connection(connection: socket.socket, addr):
             pass
 
         elif protocol == "minecraft":
-            pass
+            threading.Thread(target=mc_proxy.handle_client, args=(connection,)).start()
 
         else:
             print(f"[x] Unknown protocol from {addr}, first byte: {data[0]}")

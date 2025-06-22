@@ -2,19 +2,21 @@
 # Port on which minecraft is running
 MC_SERVER_PORT = 25565
 
-# Port on which Socks 5 proxy is listening
-SOCKS5_PORT = 1080
+# Minecraft ip on which minecraft is running
+MC_SERVER_IP = "localhost"
 
-# Port on which Socks 5 proxy is listening
-SOCKS4_PORT = 1081
+# SOCKS
+# username and password for socks5 leave empty to connect without credentials
+SOCKS5_USERNAME = ""
+SOCKS5_PASSWORD = ""
 
-# Port on which HTTP proxy is listening
-HTTP_PROXY_PORT = 8082
+# username for socks4 leave empty to connect without credentials
+SOCKS4_USERNAME = ""
 
-# Port on which VPN  is listening
-VPN_PORT = 1194
 
-# static webpapes port: {"port":"path"} example: {"8888":"templates/html"}
+# static webpapes: 
+# structure- {"port":"path"}
+# example: {"8888":"templates/index.html", "9999":"templates/xyz.html"}
 # don't use ports which are already used by other services
 STATIC_WEBPAGES_PORTS = {}
 
