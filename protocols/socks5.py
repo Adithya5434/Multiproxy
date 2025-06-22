@@ -74,8 +74,9 @@ class Proxy:
             bind_ip, bind_port = remote_sock.getsockname()
 
             connection.sendall(b'\x05\x00\x00\x01' + socket.inet_aton(bind_ip) + bind_port.to_bytes(2, 'big')) # succeeded
-            
             connection.settimeout(5) # optional
+            
+            print(f"[SOCKS4] {connection.getpeername()} -> {address}:{port}")
 
             self.relay_loop(connection, remote_sock)
         except:
@@ -122,3 +123,22 @@ class Proxy:
         connection.sendall(b'\x05\xFF')
         connection.close()
         return False
+
+    def start(self, host = "0.0.0.0", port = 1080):
+        import threading
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind((host, port))
+        sock.listen()
+
+        print(f"Listening on {host}:{port}")
+
+        while True:
+            conn, addr = sock.accept()
+            print(f"Connection from {addr}")
+            threading.Thread(target=self.handle_client, args=(conn,)).start()
+            
+
+if __name__ == "__main__":
+    proxy = Proxy()
+    proxy.start()
