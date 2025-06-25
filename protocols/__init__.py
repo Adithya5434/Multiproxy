@@ -4,16 +4,14 @@ import threading
 from utils import detect_protocol
 import config
 
-import socks5
-import socks4
-import minecraft_proxy
-import static_web
-import http_proxy
+from . import socks5
+from . import socks4
+from . import minecraft_proxy
+from . import http_proxy
 
 socks5_proxy = socks5.Proxy(config.SOCKS5_USERNAME, config.SOCKS5_PASSWORD)
 socks4_proxy = socks4.Proxy(config.SOCKS4_USERNAME)
 mc_proxy = minecraft_proxy.Proxy()
-static_web_proxy = static_web.Proxy()
 httpProxy = http_proxy.Proxy()
 
 def route_connection(connection: socket.socket, addr, DEBUG=False):
@@ -26,7 +24,7 @@ def route_connection(connection: socket.socket, addr, DEBUG=False):
             return
 
         protocol = detect_protocol(data)
-
+        if DEBUG: print(f"[+] Detected protocol {protocol} from {addr}, first byte: {data[0]}")
         if protocol == "socks5":
             threading.Thread(target=socks5_proxy.handle_client, args=(connection,)).start()
             return
@@ -37,10 +35,6 @@ def route_connection(connection: socket.socket, addr, DEBUG=False):
 
         elif protocol == "http_proxy":
             threading.Thread(target=httpProxy.handle_client, args=(connection,)).start()
-            return
-
-        elif protocol == "http_web":
-            threading.Thread(target=static_web_proxy.handle_client, args=(connection,)).start()
             return
 
         elif protocol == "minecraft":
