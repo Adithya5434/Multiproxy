@@ -12,7 +12,7 @@ from . import http_proxy
 
 socks5_proxy = socks5.Proxy(config.SOCKS5_USERNAME, config.SOCKS5_PASSWORD)
 socks4_proxy = socks4.Proxy(config.SOCKS4_USERNAME)
-mc_proxy = minecraft_proxy.Proxy()
+mc_proxy = minecraft_proxy.Proxy(config.MC_SERVER_IP, config.MC_SERVER_PORT)
 httpProxy = http_proxy.Proxy()
 
 logger = logging.getLogger(__name__)
