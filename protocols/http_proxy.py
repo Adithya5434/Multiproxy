@@ -1,9 +1,17 @@
 import socket
 import threading
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Proxy:
+    """A simple HTTP proxy server"""
+    
     def handle_client(self, connection: socket.socket):
+        client_ip = None
         try:
+            client_ip = connection.getpeername()[0]
+
             request = connection.recv(4096)
             if not request:
                 connection.close()
@@ -18,17 +26,19 @@ class Proxy:
                 host, port = target.split(":")
                 port = int(port)
 
-                remote_sock = socket.create_connection((host, port))
-                # remote_sock.settimeout(5) # optional
+                logger.info("Client %s requested CONNECT to %s:%d", client_ip, host, port)
 
+                remote_sock = socket.create_connection((host, port))
                 connection.sendall(b"HTTP/1.1 200 Connection Established\r\n\r\n")
 
-                threading.Thread(target=self.forward, args=(connection, remote_sock)).start()
-                threading.Thread(target=self.forward, args=(remote_sock, connection)).start()
-        
-            else: # http
+                threading.Thread(target=self.relay_loop, args=(connection, remote_sock, client_ip)).start()
+                threading.Thread(target=self.relay_loop, args=(remote_sock, connection, client_ip)).start()
+
+            # http
+            else: 
                 host_header = [line for line in request.decode(errors="ignore").split("\r\n") if line.lower().startswith("host:")]
                 if not host_header:
+                    logger.warning("Client %s sent HTTP request without Host header", client_ip)
                     connection.close()
                     return
                 
@@ -39,40 +49,45 @@ class Proxy:
                 else:
                     port = 80
                 
+                logger.info("Client %s requested HTTP to %s:%d", client_ip, host, port)
+
                 remote_sock = socket.create_connection((host, port))
                 remote_sock.sendall(request)
 
-                threading.Thread(target=self.forward, args=(connection, remote_sock)).start()
-                threading.Thread(target=self.forward, args=(remote_sock, connection)).start()
+                threading.Thread(target=self.relay_loop, args=(connection, remote_sock, client_ip)).start()
+                threading.Thread(target=self.relay_loop, args=(remote_sock, connection, client_ip)).start()
 
         except Exception as e:
-            print(f"[HTTP PROXY ERROR] {e}")
+            logger.error("Error handling client %s: %s", client_ip or "Unknown", e)
             connection.close()
-            return
 
 
-    def forward(self, source: socket.socket, destination: socket.socket):
+    def relay_loop(self, source: socket.socket, destination: socket.socket, client_ip: str):
+        logger.debug("Started relaying traffic for %s", client_ip)
         try:
             while True:
                 data = source.recv(4096)
                 if not data:
                     break
                 destination.sendall(data)
-        except:
-            pass
-        source.close()
-        destination.close()
+        except Exception as e:
+            logger.warning("Relay error with %s: %s", client_ip, e)
+        finally:
+            source.close()
+            destination.close()
+            logger.debug("Closed connections for %s", client_ip)
 
-    def start(self, host="0.0.0.0", port=8080):
+
+    def start(self, host = "0.0.0.0", port = 8080):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((host, port))
         sock.listen()
 
-        print(f"[http Proxy] Listening on {host}:{port}")
+        logger.info("Http proxy Listening on %s:%d", host, port)
 
         while True:
             conn, addr = sock.accept()
-            print(f"[Minecraft Proxy] Connection from {addr}")
+            logger.info("Accepted connection from %s", addr)
             threading.Thread(target=self.handle_client, args=(conn,)).start()
 
 if __name__ == "__main__":

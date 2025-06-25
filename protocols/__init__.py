@@ -1,5 +1,6 @@
 import socket
 import threading
+import logging
 
 from utils import detect_protocol
 import config
@@ -14,17 +15,20 @@ socks4_proxy = socks4.Proxy(config.SOCKS4_USERNAME)
 mc_proxy = minecraft_proxy.Proxy()
 httpProxy = http_proxy.Proxy()
 
+logger = logging.getLogger(__name__)
+
 def route_connection(connection: socket.socket, addr, DEBUG=False):
     try:
         data = connection.recv(1024, socket.MSG_PEEK)
 
         if not data:
-            if DEBUG: print(f"[X] No data form {addr}")
+            logger.warning(f"No data received from {addr}")
             connection.close()
             return
 
         protocol = detect_protocol(data)
-        if DEBUG: print(f"[+] Detected protocol {protocol} from {addr}, first byte: {data[0]}")
+        logger.debug(f"Detected protocol: {protocol} from {addr}, first byte: {data[0]}")
+
         if protocol == "socks5":
             threading.Thread(target=socks5_proxy.handle_client, args=(connection,)).start()
             return
@@ -42,10 +46,9 @@ def route_connection(connection: socket.socket, addr, DEBUG=False):
             return
         
         else:
-            if DEBUG:
-                print(f"[x] Unknown protocol from {addr}, first byte: {data[0]}")
+            logger.warning(f"Unknown protocol from {addr}, first byte: {data[0]}")
             connection.close()
 
     except Exception as e:
-        if DEBUG: print(f"[!] Router error form {addr}: ", e)
+        logger.error(f"Router error from {addr}: {e}")
         connection.close()

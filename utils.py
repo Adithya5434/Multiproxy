@@ -32,7 +32,7 @@ def detect_protocol(data: bytes) -> str | None:
                 if path.startswith("http://") or path.startswith("https://"):
                     return "http_proxy"
                 else:
-                    return "http_web"
+                    return "http_web" # if the ip was opened in a browser
         except:
             return None
 

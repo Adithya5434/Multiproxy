@@ -1,2 +1,7 @@
-temp/*
 protocols/__pycache__/
+__pycache__/
+*.py[cod]
+
+.vscode/
+tempCodeRunnerFile.py
+temp/
