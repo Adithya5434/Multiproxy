@@ -78,13 +78,13 @@ class Proxy:
             logger.info("Client %s requested connection to %s:%d", client_ip, address, port)
 
             remote_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            remote_sock.settimeout(5) # optional
+            # remote_sock.settimeout(5) # optional
             remote_sock.connect((address, port))
 
             bind_ip, bind_port = remote_sock.getsockname()
 
             connection.sendall(b'\x05\x00\x00\x01' + socket.inet_aton(bind_ip) + bind_port.to_bytes(2, 'big')) # succeeded
-            connection.settimeout(5) # optional
+            # connection.settimeout(5) # optional
 
             logger.info("Connection from %s to %s:%d established", client_ip, address, port)
             

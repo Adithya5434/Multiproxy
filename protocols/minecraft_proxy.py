@@ -16,8 +16,8 @@ class Proxy:
             client_ip = connection.getpeername()[0]
             remote_socket = socket.create_connection((self.mc_host, self.mc_port))
 
-            remote_socket.settimeout(10)
-            connection.settimeout(10)
+            # remote_socket.settimeout(10)
+            # connection.settimeout(10)
 
             threading.Thread(target=self.relay_loop, args=(connection, remote_socket, client_ip)).start()
             threading.Thread(target=self.relay_loop, args=(remote_socket, connection, client_ip)).start()

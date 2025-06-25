@@ -59,13 +59,13 @@ class Proxy:
 
             # connect to remote host
             remote_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            remote_sock.settimeout(5) # optional
+            # remote_sock.settimeout(5) # optional
             remote_sock.connect((address, port))
 
             bind_ip, bind_port = remote_sock.getsockname()
 
             connection.sendall(b'\x00\x5A' + port.to_bytes(2, 'big') + socket.inet_aton(bind_ip)) # success 
-            connection.settimeout(5) # optional
+            # connection.settimeout(5) # optional
 
             logger.info("Connection from %s to %s:%d established", client_ip, address, port)
 
