@@ -64,7 +64,7 @@ class Proxy:
             print(f"[SOCKS4 ERROR] ({connection.getpeername()} -> {userid.decode(errors='ignore')}@{address}:{port}): {e}")
             return
         
-        print(f"[SOCKS4] Connection closed ({connection.getpeername()} -> {userid.decode(errors='ignore')}@{address}:{port})")
+        print(f"[SOCKS4] Connection closed () -> {userid.decode(errors='ignore')}@{address}:{port})")
     
     def relay_loop(self, client_socket: socket.socket, remote_socket: socket.socket):
         while True:

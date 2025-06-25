@@ -76,10 +76,14 @@ class Proxy:
             connection.sendall(b'\x05\x00\x00\x01' + socket.inet_aton(bind_ip) + bind_port.to_bytes(2, 'big')) # succeeded
             connection.settimeout(5) # optional
             
-            print(f"[SOCKS4] {connection.getpeername()} -> {address}:{port}")
+            try:
+                print(f"[SOCKS5] {connection.getpeername()} -> {address}:{port}")
+            except OSError:
+                print(f"[SOCKS5] [closed socket] -> {address}:{port}")
 
             self.relay_loop(connection, remote_sock)
-        except:
+        except Exception as e:
+            print(f"[SOCKS5 ERROR] Failed to connect to {address}:{port} - {e}")
             connection.sendall(b'\x05\x04\x00\x01\x00\x00\x00\x00\x00\x00') # Host unreachable
             connection.close()
             return
