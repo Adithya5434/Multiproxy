@@ -27,7 +27,7 @@ def route_connection(connection: socket.socket, addr, DEBUG=False):
             return
 
         protocol = detect_protocol(data)
-        logger.debug(f"Detected protocol: {protocol} from {addr}, first byte: {data[0]}")
+        logger.debug(f"Detected protocol: {protocol} from {addr}, first byte: {data[0:100]}")
 
         if protocol == "socks5":
             threading.Thread(target=socks5_proxy.handle_client, args=(connection,)).start()

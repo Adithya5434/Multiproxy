@@ -4,7 +4,7 @@ def detect_protocol(data: bytes) -> str | None:
         return None  # Too small to determine
 
     # Minecraft
-    if data[0] in [0xFE, 0x02, 0x10]:
+    if is_minecraft_protocol(data):
         return "minecraft"
     
     # SOCKS5
@@ -37,3 +37,37 @@ def detect_protocol(data: bytes) -> str | None:
             return None
 
     return None
+
+
+def read_varint(data, offset=0):
+    value = 0
+    shift = 0
+    pos = offset
+    while True:
+        if pos >= len(data):
+            raise ValueError("VarInt extends beyond data length")
+        byte = data[pos]
+        value |= (byte & 0x7F) << shift
+        shift += 7
+        pos += 1
+        if not (byte & 0x80):
+            break
+        if shift > 35:
+            raise ValueError("VarInt too big")
+    return value, pos
+
+
+def is_minecraft_protocol(data):
+    try:
+        if data[0] in (0xFE, 0x02, 0x10):
+            return True
+        
+        # Read packet length
+        _, index = read_varint(data)
+
+        # Read packet ID
+        packet_id, index = read_varint(data, index)
+
+        return packet_id == 0x00
+    except:
+        return False
