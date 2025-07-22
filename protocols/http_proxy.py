@@ -1,3 +1,4 @@
+import select
 import socket
 import threading
 import logging
@@ -31,8 +32,7 @@ class Proxy:
                 remote_sock = socket.create_connection((host, port))
                 connection.sendall(b"HTTP/1.1 200 Connection Established\r\n\r\n")
 
-                threading.Thread(target=self.relay_loop, args=(connection, remote_sock, client_ip)).start()
-                threading.Thread(target=self.relay_loop, args=(remote_sock, connection, client_ip)).start()
+                self.relay_loop(connection, remote_sock, client_ip)
 
             # http
             else: 
@@ -54,8 +54,7 @@ class Proxy:
                 remote_sock = socket.create_connection((host, port))
                 remote_sock.sendall(request)
 
-                threading.Thread(target=self.relay_loop, args=(connection, remote_sock, client_ip)).start()
-                threading.Thread(target=self.relay_loop, args=(remote_sock, connection, client_ip)).start()
+                self.relay_loop(connection, remote_sock, client_ip)
 
         except Exception as e:
             logger.error("Error handling client %s: %s", client_ip or "Unknown", e)
@@ -63,18 +62,29 @@ class Proxy:
 
 
     def relay_loop(self, source: socket.socket, destination: socket.socket, client_ip: str):
-        logger.debug("Started relaying traffic for %s", client_ip)
+        logger.info("Relaying connection from %s to %s:%d", client_ip, self.mc_host, self.mc_port)
         try:
             while True:
-                data = source.recv(4096)
-                if not data:
-                    break
-                destination.sendall(data)
+                readable, _, _ = select.select([source, destination], [], [])
+
+                if source in readable:
+                    data = source.recv(4096)
+                    if not data:
+                        break
+                    destination.sendall(data)
+
+                if destination in readable:
+                    data = destination.recv(4096)
+                    if not data:
+                        break
+                    source.sendall(data)
         except Exception as e:
             logger.warning("Relay error with %s: %s", client_ip, e)
         finally:
-            source.close()
-            destination.close()
+            try: source.close()
+            except: pass
+            try: destination.close()
+            except: pass
             logger.debug("Closed connections for %s", client_ip)
 
 

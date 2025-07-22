@@ -1,5 +1,4 @@
 import socket
-import threading
 import logging
 
 from utils import detect_protocol
@@ -27,22 +26,22 @@ def route_connection(connection: socket.socket, addr, DEBUG=False):
             return
 
         protocol = detect_protocol(data)
-        logger.debug(f"Detected protocol: {protocol} from {addr}, first byte: {data[0:100]}")
+        logger.debug(f"Detected protocol: {protocol} from {addr}, first few bytes: {data[0:100]}")
 
         if protocol == "socks5":
-            threading.Thread(target=socks5_proxy.handle_client, args=(connection,)).start()
+            socks5_proxy.handle_client(connection)
             return
 
         elif protocol == "socks4":
-            threading.Thread(target=socks4_proxy.handle_client, args=(connection,)).start()
+            socks4_proxy.handle_client(connection)
             return
 
         elif protocol == "http_proxy":
-            threading.Thread(target=httpProxy.handle_client, args=(connection,)).start()
+            httpProxy.handle_client(connection)
             return
 
         elif protocol == "minecraft":
-            threading.Thread(target=mc_proxy.handle_client, args=(connection,)).start()
+            mc_proxy.handle_client(connection)
             return
         
         else:
