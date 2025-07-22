@@ -1,21 +1,24 @@
-﻿# Multiprotocol Proxy Server 
+﻿# 🌀 Multiprotocol Proxy Server
 
-This is a simple Python-based proxy server that supports **SOCKS4**, **SOCKS5**, **HTTP**, and **Minecraft** — all running on the same port.
-
-It works by detecting which protocol the client is using and routes it to the handler.
+A lightweight Python-based proxy server that supports **SOCKS4**, **SOCKS5**, **HTTP**, and **Minecraft** — all running on a **single port**.
 
 ---
 
-## Features
+## ✨ Features
 
-- SOCKS4 proxy 
-- SOCKS5 proxy
-- HTTP proxy
-- Minecraft TCP proxy
--Everything runs on single port
+✅ Supports the following protocols:
+
+- 🌐 **HTTP Proxy**  
+- 🧦 **SOCKS4 Proxy**  
+- 🧦 **SOCKS5 Proxy** *(TCP only)*  
+- 🎮 **Minecraft Proxy** *(only servers with online-mode=false)*
+
+✅ Everything runs on a **single port**, auto-detecting the protocol using packet inspection.  
+✅ Easily extensible for more protocols.
+
 ---
 
-## Usage
+## 🚀 Usage
 
 ```bash
 git clone https://github.com/Adithya5434/Multiproxy.git
