@@ -14,6 +14,7 @@ A lightweight Python-based proxy server that supports **SOCKS4**, **SOCKS5**, **
 - 🎮 **Minecraft Proxy** *(only servers with online-mode=false)*
 
 ✅ Everything runs on a **single port**, auto-detecting the protocol using packet inspection.  
+✅ Bypasses TCPShield plugin (tested on AppleMC).
 ✅ Easily extensible for more protocols.
 
 ---
