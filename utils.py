@@ -56,6 +56,17 @@ def read_varint(data, offset=0):
             raise ValueError("VarInt too big")
     return value, pos
 
+def write_varint(value: int) -> bytes:
+    result = bytearray()
+    while True:
+        temp = value & 0x7F  # Take 7 bits
+        value >>= 7
+        if value != 0:
+            temp |= 0x80  # Set continuation bit
+        result.append(temp)
+        if value == 0:
+            break
+    return bytes(result)
 
 def is_minecraft_protocol(data):
     try:

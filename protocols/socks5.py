@@ -119,8 +119,10 @@ class Proxy:
         except Exception as e:
             logger.warning("Relay error with %s: %s", client_ip, e)
         finally:
-            client_socket.close()
-            remote_socket.close()
+            try: client_socket.close()
+            except: pass
+            try: remote_socket.close()
+            except: pass
             logger.debug("Closed connections for %s", client_ip)
 
 
